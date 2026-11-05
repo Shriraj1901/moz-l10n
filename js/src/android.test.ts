@@ -118,6 +118,21 @@ describe('success', () => {
     const res = androidSerializePattern(pattern)
     expect(res).toBe('Birthday: %1$tm %1$te,%1$tY')
   })
+
+  test('multi-digit argument indices', () => {
+    const pattern = androidParsePattern('%11$s and %2$d, %12$tm %&lt;te')
+    expect(pattern).toEqual([
+      { $: 'arg11', fn: 'string', attr: { source: '%11$s' } },
+      ' and ',
+      { $: 'arg2', fn: 'integer', attr: { source: '%2$d' } },
+      ', ',
+      { $: 'arg12', fn: 'datetime', attr: { source: '%12$tm' } },
+      ' ',
+      { $: 'arg12', fn: 'datetime', attr: { source: '%12$te' } }
+    ])
+    const res = androidSerializePattern(pattern)
+    expect(res).toBe('%11$s and %2$d, %12$tm %12$te')
+  })
 })
 
 describe('editable', () => {

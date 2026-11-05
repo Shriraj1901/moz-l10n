@@ -435,6 +435,36 @@ class TestAndroid(TestCase):
         res = android_serialize_message(msg)
         assert res == src
 
+    def test_message_expressions_multi_digit_index(self):
+        src = "%11$s and %2$d"
+        msg = android_parse_message(src)
+        assert msg == PatternMessage(
+            [
+                Expression(
+                    VariableRef("arg11"), "string", attributes={"source": "%11$s"}
+                ),
+                " and ",
+                Expression(
+                    VariableRef("arg2"), "integer", attributes={"source": "%2$d"}
+                ),
+            ]
+        )
+        assert android_serialize_message(msg) == src
+
+        msg = android_parse_message("%12$tm %&lt;te")
+        assert msg == PatternMessage(
+            [
+                Expression(
+                    VariableRef("arg12"), "datetime", attributes={"source": "%12$tm"}
+                ),
+                " ",
+                Expression(
+                    VariableRef("arg12"), "datetime", attributes={"source": "%12$te"}
+                ),
+            ]
+        )
+        assert android_serialize_message(msg) == "%12$tm %12$te"
+
     def test_message_markup(self):
         src = "Welcome to <b>&foo;</b>&bar;!"
         msg = android_parse_message(src)
